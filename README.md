@@ -1,4 +1,4 @@
-# 🤖 Projeto de IA: Análise do fluxo do trânsito de uma região da cidade
+# 🤖 Projeto da disciplina [IMD3001] - Introdução à inteligência artificial: análise do fluxo do trânsito de uma região da cidade.
 
 Este projeto realiza a análise inteligente do fluxo de veículos usando visão computacional.
 
