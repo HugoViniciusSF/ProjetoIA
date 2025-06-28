@@ -1,4 +1,4 @@
-# 🤖 Projeto de IA: Análise do Fluxo do Trânsito de uma Região da Cidade
+# 🤖 Projeto de IA: Análise do fluxo do trânsito de uma região da cidade
 
 Este projeto realiza a análise inteligente do fluxo de veículos usando visão computacional.
 
