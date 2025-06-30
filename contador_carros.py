@@ -6,8 +6,6 @@ from math import sqrt
 import time
 
 # --- IMPORTAÇÃO DOS MÓDULOS DE ANÁLISE ---
-# Importamos as nossas duas lógicas de classificação. Cada uma atuará como um "especialista"
-# que será consultado para dar o seu parecer sobre o estado do trânsito.
 from classificador_bayesiano import classificar_estado_bayesiano
 from classificador_markov import ClassificadorMarkoviano
 
@@ -42,7 +40,7 @@ next_object_id = 0
 total_real_count = 0
 
 # --- INICIALIZAÇÃO DOS CLASSIFICADORES E VARIÁVEIS DE ANÁLISE ---
-# Criamos uma instância do nosso classificador com memória (Markoviano).
+
 classificador_markov = ClassificadorMarkoviano()
 # Variáveis para guardar o último estado de cada classificador para exibição.
 estado_bayesiano_atual = "Indeterminado"
@@ -145,23 +143,23 @@ while True:
 
     # --- BLOCO DE ANÁLISE E COMPARAÇÃO ---
     current_time = time.time()
-    # A cada 10 segundos, executa a análise.
+    # A cada tempo determinado em TIME_WINDOW_SECONDS, executamos a análise.
     if current_time - last_analysis_time >= TIME_WINDOW_SECONDS:
         # A hora é fixada para simular um horário.
         hora_do_dia = 14
         
         # --- COMPARAÇÃO DIRETA ---
-        # 1. Obtém a classificação usando rede bayseana (sem memória).
+        # 1. Classificação usando rede bayseana.
         estado_bayesiano_atual = classificar_estado_bayesiano(cars_in_window, hora_do_dia)
         
-        # 2. Obtém a classificação usando Markov (com memória do estado anterior).
+        # 2. Classificação usando Markov.
         estado_markoviano_atual = classificador_markov.classificar_estado(cars_in_window)
         
-        # Imprime os dois resultados no terminal para comparação.
+        # Impressões.
         print("-" * 20, f"ANÁLISE ({hora_do_dia}h)", "-" * 20)
         print(f"Carros na janela: {cars_in_window}")
-        print(f"--> Classificação Bayesiana: {estado_bayesiano_atual}")
-        print(f"--> Classificação Markoviana : {estado_markoviano_atual}")
+        print(f"* Classificação Bayesiana: {estado_bayesiano_atual}")
+        print(f"* Classificação Markoviana : {estado_markoviano_atual}")
 
         # Reseta a janela para a próxima análise.
         last_analysis_time = current_time
@@ -182,6 +180,6 @@ while True:
 # --- FINALIZAÇÃO ---
 fps.stop()
 print(f"[INFO] FPS: {fps.fps():.2f}")
-print(f"[INFO] Contagem final de carros unicos: {total_real_count}")
+print(f"[INFO] Contagem final de carros únicos: {total_real_count}")
 camera.release()
 cv2.destroyAllWindows()
