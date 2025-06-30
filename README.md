@@ -8,8 +8,8 @@ O sistema detecta veículos em vídeos, atribui identificadores únicos a cada c
 
 ## 👷 Alunos
 
-* [Gabriel Costa Lima Dantas](https://github.com/Gcld) ([gabriel.lima.712@ufrn.edu.br](mailto:gabriel.lima.712@ufrn.edu.br))
-* [Hugo Vinicius da Silva Figueirêdo](https://github.com/HugoViniciusSF) ([hugovenicius@hotmail.com.br](mailto:hugovenicius@hotmail.com.br))
+* [Gabriel Costa Lima Dantas](https://github.com/Gcld)
+* [Hugo Vinicius da Silva Figueirêdo](https://github.com/HugoViniciusSF)
 
 ## ⚙️ Requisitos
 
