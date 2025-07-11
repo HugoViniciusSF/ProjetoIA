@@ -4,38 +4,34 @@ import imutils
 from imutils.video import FPS
 from math import sqrt
 import time
-
-# --- IMPORTAÇÃO DOS MÓDULOS DE ANÁLISE ---
 from classificador_bayesiano import classificar_estado_bayesiano
 from classificador_markov import ClassificadorMarkoviano
 
-# --- PARÂMETROS DE AJUSTE ---
-VIDEO_SOURCE = "./video/video_transito.mp4"
+#Paranetros de ajustes
+VIDEO_SOURCE = "./video/video_transito4.mp4"
 PROTOTXT_PATH = "./MobileNetSSD_deploy.prototxt.txt"
 MODEL_PATH = "./MobileNetSSD_deploy.caffemodel"
 
-# Array de objetos para identificação (carros e motocicletas)
+#Array de objetos para identificação (carros e motos)
 ITENS_IDENTIFICADOS = ["car", "motorbike"]
 
-# Parâmetros de Rastreamento Diferenciados por Tipo de Veículo
 VEHICLE_PARAMS = {
     'car': {
-        'confidence_threshold': 0.5,        # Confiança padrão para carros
-        'stability_threshold': 10,          # Frames necessários para contar carros
-        'disappeared_threshold': 15,        # Frames para esquecer carros
-        'max_distance': 75                  # Raio de busca para carros
+        'confidence_threshold': 0.5,        #Confiança padrão para carros
+        'stability_threshold': 10,          #Frames necessários para contar carros
+        'disappeared_threshold': 15,        #Frames para esquecer carros
+        'max_distance': 75                  #Raio de busca para carros
     },
     'motorbike': {
         'confidence_threshold': 0.2,       
-        'stability_threshold': 0.5,           
-        'disappeared_threshold': 5,       
-        'max_distance': 100               
+        'stability_threshold': 0.5,
+        'disappeared_threshold': 5,
+        'max_distance': 100       
     }
 }
 
-TIME_WINDOW_SECONDS = 10  # Janela de tempo (em segundos) para cada análise de trânsito.
+TIME_WINDOW_SECONDS = 10  #Janela de tempo para cada análise de trânsito.
 
-# --- INICIALIZAÇÃO ---
 camera = cv2.VideoCapture(VIDEO_SOURCE)
 CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle",
         "bus", "car", "cat", "chair", "cow", "diningtable", "dog",
@@ -46,28 +42,24 @@ print("[INFO] Carregando modelo...")
 net = cv2.dnn.readNetFromCaffe(PROTOTXT_PATH, MODEL_PATH)
 fps = FPS().start()
 
-# --- ESTRUTURA DE DADOS DO RASTREADOR ---
 tracked_objects = {}
 next_object_id = 0
 
-# Contadores separados para cada tipo de veículo
 total_cars_count = 0
 total_motorbikes_count = 0
 total_vehicles_count = 0
 
-# --- INICIALIZAÇÃO DOS CLASSIFICADORES E VARIÁVEIS DE ANÁLISE ---
 classificador_markov = ClassificadorMarkoviano()
 
 estado_bayesiano_atual = "Indeterminado"
 estado_markoviano_atual = "Indeterminado"
 
-# Variáveis para a análise baseada em janela de tempo.
+#Variáveis para a análise baseada em janela de tempo.
 cars_in_window = 0
 motorbikes_in_window = 0
 vehicles_in_window = 0
 last_analysis_time = time.time()
 
-# --- CICLO PRINCIPAL ---
 while True:
     (grabbed, image) = camera.read()
     if not grabbed:
@@ -76,20 +68,20 @@ while True:
     image = imutils.resize(image, width=700)
     (h, w) = image.shape[:2]
     
-    # --- Deteção de Objetos ---
+    #Detecção dos objetos
     blob = cv2.dnn.blobFromImage(cv2.resize(image, (300, 300)), 0.007843, (300, 300), 127.5)
     net.setInput(blob)
     detections = net.forward()
     
     current_frame_objects = []
     
-    # Filtra as deteções com thresholds específicos para cada tipo
+    #Filtra as deteções com thresholds específicos para cada tipo
     for i in np.arange(0, detections.shape[2]):
         confidence = detections[0, 0, i, 2]
         idx = int(detections[0, 0, i, 1])
         detected_class = CLASSES[idx]
         
-        # Verifica se é um veículo de interesse e aplica threshold específico
+        #Verifica se é um veículo de interesse e aplica limite específico
         if detected_class in ITENS_IDENTIFICADOS:
             vehicle_threshold = VEHICLE_PARAMS[detected_class]['confidence_threshold']
             
@@ -106,7 +98,7 @@ while True:
                     'confidence': confidence
                 })
     
-    # --- Lógica de Associação de IDs ---
+    #Lógica de associação de IDs
     if len(tracked_objects) == 0:
         for obj in current_frame_objects:
             tracked_objects[next_object_id] = {
@@ -133,7 +125,7 @@ while True:
             
             for j, new_obj in enumerate(current_frame_objects):
                 if not used_detections[j]:
-                    # Prioriza mesmo tipo de veículo, mas permite associação cruzada
+                    #Prioriza mesmo tipo de veículo, mas permite associação cruzada
                     if tracked_objects[obj_id]['vehicle_type'] == new_obj['vehicle_type']:
                         dist = sqrt((previous_centroids[i][0] - new_obj['centroid'][0])**2 + 
                                 (previous_centroids[i][1] - new_obj['centroid'][1])**2)
@@ -164,7 +156,7 @@ while True:
                 }
                 next_object_id += 1
     
-    # --- Lógica de Contagem e Remoção de Objetos ---
+    #Lógica de contagem e remoção de veiculos
     objects_to_delete = []
     
     for obj_id, data in tracked_objects.items():
@@ -172,7 +164,7 @@ while True:
         stability_threshold = VEHICLE_PARAMS[vehicle_type]['stability_threshold']
         disappeared_threshold = VEHICLE_PARAMS[vehicle_type]['disappeared_threshold']
         
-        # Contagem com thresholds específicos
+        #Contagem com thresholds específicos
         if data['frames_seen'] >= stability_threshold and not data['counted']:
             if data['vehicle_type'] == 'car':
                 total_cars_count += 1
@@ -185,18 +177,18 @@ while True:
             vehicles_in_window += 1
             data['counted'] = True
             
-            # Log para debug
+            #Log de consulta
             print(f"[CONTADO] {data['vehicle_type'].upper()} ID {obj_id} - Confiança: {data['confidence']:.2f} - Frames vistos: {data['frames_seen']}")
         
-        # Remoção com thresholds específicos
+        #Remoção com thresholds específicos
         if data['frames_unseen'] > disappeared_threshold:
             objects_to_delete.append(obj_id)
         
-        # --- Desenho na tela ---
+        #Desenho na tela
         if data['vehicle_type'] == 'car':
-            color = (0, 255, 0) if not data['counted'] else (0, 0, 255)  # Verde/Vermelho
-        else:  # motorbike
-            color = (255, 255, 0) if not data['counted'] else (0, 165, 255)  # Amarelo/Laranja
+            color = (0, 255, 0) if not data['counted'] else (0, 0, 255)  #Verde/vermelho
+        else:  # moto
+            color = (255, 255, 0) if not data['counted'] else (0, 165, 255)  # marelo/laranja
         
         (startX, startY, endX, endY) = data['box']
         cv2.rectangle(image, (startX, startY), (endX, endY), color, 2)
@@ -206,11 +198,11 @@ while True:
         cv2.putText(image, text, (data['centroid'][0] - 20, data['centroid'][1] - 10), 
                 cv2.FONT_HERSHEY_SIMPLEX, 0.4, color, 1)
     
-    # Remove objetos que desapareceram
+    #Remove veiculos que desapareceram
     for obj_id in objects_to_delete:
         del tracked_objects[obj_id]
     
-    # --- ANÁLISE PERIÓDICA ---
+    #ANÁLISE PERIÓDICA
     current_time = time.time()
     
     if current_time - last_analysis_time >= TIME_WINDOW_SECONDS:
@@ -220,11 +212,11 @@ while True:
         estado_markoviano_atual = classificador_markov.classificar_estado(vehicles_in_window)
         
         print("-" * 25, f"ANÁLISE ({hora_do_dia}h)", "-" * 25)
-        print(f"🚗 Carros na janela: {cars_in_window}")
-        print(f"🏍️  Motos na janela: {motorbikes_in_window}")
-        print(f"🚦 Total de veículos na janela: {vehicles_in_window}")
-        print(f"�� Classificação Bayesiana: {estado_bayesiano_atual}")
-        print(f"📈 Classificação Markoviana: {estado_markoviano_atual}")
+        print(f"Carros na janela: {cars_in_window}")
+        print(f"Motos na janela: {motorbikes_in_window}")
+        print(f"Total de veículos na janela: {vehicles_in_window}")
+        print(f"Classificação Bayesiana: {estado_bayesiano_atual}")
+        print(f"Classificação Markoviana: {estado_markoviano_atual}")
         print("-" * 60)
         
         last_analysis_time = current_time
@@ -232,7 +224,7 @@ while True:
         motorbikes_in_window = 0
         vehicles_in_window = 0
     
-    # --- Interface Visual ---
+    #Informacoes
     cv2.putText(image, f"Bayes: {estado_bayesiano_atual}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
     cv2.putText(image, f"Markov: {estado_markoviano_atual}", (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
     
@@ -248,11 +240,13 @@ while True:
     
     fps.update()
 
-# --- FINALIZAÇÃO ---
+#Fim
 fps.stop()
 print(f"\n[INFO] FPS: {fps.fps():.2f}")
 print(f"[INFO] Contagem final de carros únicos: {total_cars_count}")
 print(f"[INFO] Contagem final de motos únicas: {total_motorbikes_count}")
 print(f"[INFO] Contagem final total de veículos: {total_vehicles_count}")
+print(f"[INFO] Classificação Bayesiana: {estado_bayesiano_atual}")
+print(f"[INFO] Classificação Markoviana: {estado_markoviano_atual}")
 camera.release()
 cv2.destroyAllWindows()
