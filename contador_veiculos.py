@@ -17,7 +17,7 @@ ITENS_IDENTIFICADOS = ["car", "motorbike"]
 
 VEHICLE_PARAMS = {
     'car': {
-        'confidence_threshold': 0.5,        #Confiança padrão para carros
+        'confidence_threshold': 0.5,        #Confiança
         'stability_threshold': 10,          #Frames necessários para contar carros
         'disappeared_threshold': 15,        #Frames para esquecer carros
         'max_distance': 75                  #Raio de busca para carros

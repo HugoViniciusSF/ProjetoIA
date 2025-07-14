@@ -20,7 +20,6 @@ CPT = {
 }
 
 def classificar_estado_bayesiano(veiculos_contados, hora_atual):
-    """Classifica o estado do trânsito usando a inferência Bayesiana baseado no total de veículos."""
     contagem_cat = 'BAIXA' if veiculos_contados < LEVE_THRESHOLD else 'MEDIA' if veiculos_contados < MODERADO_THRESHOLD else 'ALTA'
     hora_cat = 'PICO' if (7 <= hora_atual < 9) or (17 <= hora_atual < 19) else 'NORMAL'
     

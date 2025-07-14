@@ -4,7 +4,6 @@ MODERADO_THRESHOLD = 12  # Entre LEVE_THRESHOLD e MODERADO_THRESHOLD veículos =
 # Acima de MODERADO_THRESHOLD veículos = Trânsito Alto
 
 class ClassificadorMarkoviano:
-    """Classifica o estado do trânsito usando uma Cadeia de Markov, que possui "memória" do estado anterior."""
     
     def __init__(self):
         self.current_state = "Indeterminado"
@@ -15,7 +14,7 @@ class ClassificadorMarkoviano:
         # Discretiza a evidência atual
         categoria_contagem = 'BAIXA' if veiculos_contados < LEVE_THRESHOLD else 'MEDIA' if veiculos_contados < MODERADO_THRESHOLD else 'ALTA'
         
-        # Lógica de transição de estado (a "memória" de Markov)
+        # Lógica de transição de estado
         if self.current_state == "LEVE" or self.current_state == "Indeterminado":
             if categoria_contagem == 'ALTA':
                 self.current_state = 'MODERADO'  # Não salta diretamente para ALTO
