@@ -88,9 +88,14 @@ O rastreamento de veículos implementa uma busca por vizinho mais próximo. Para
 * No classificador de Markov, o conhecimento é modelado como uma **máquina de estados**, onde as transições entre os estados (Leve, Moderado, Alto) dependem da observação atual (contagem de veículos) e do estado anterior.
 
 
-## Fluxo do sistema:
+## Fluxo identificação do veiculo
+![Fluxo identificação do veiculo](./fluxos/Detecção_veiculo.png)
 
+## Fluxo tirar veiculo desaparecido
+![Fluxo tirar veiculo desaparecido](./fluxos/Tirar_veiculo_desaparecido.png)
 
+## Fluxo Markov
+![Fluxo Markov](./fluxos/Markov.png)
 
 ## Modelagem do agente (PEAS e arquitetura)
 
